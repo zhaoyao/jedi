@@ -17,8 +17,4 @@ public class DoubleStringSerializer implements StringSerializer<Double> {
         return Double.parseDouble(value);
     }
 
-	public static void main(String[] args) {
-		System.out.println(Double.parseDouble("1.325411323E9"));
-	}
-
 }
