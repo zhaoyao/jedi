@@ -22,6 +22,8 @@ public class StringSerializers {
 		DEFAULT_SERIALIZERS.put(long.class, new LongStringSerializer());
 		DEFAULT_SERIALIZERS.put(Integer.class, new IntegerStringSerializer());
 		DEFAULT_SERIALIZERS.put(int.class, new IntegerStringSerializer());
+		DEFAULT_SERIALIZERS.put(Short.class, new ShortStringSerializer());
+		DEFAULT_SERIALIZERS.put(short.class, new ShortStringSerializer());
 		DEFAULT_SERIALIZERS.put(Double.class, new DoubleStringSerializer());
 		DEFAULT_SERIALIZERS.put(double.class, new DoubleStringSerializer());
 		DEFAULT_SERIALIZERS.put(Float.class, new FloatStringSerializer());
