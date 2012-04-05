@@ -1,0 +1,239 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Jedi by zhaoyao</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/zhaoyao/jedi">Fork On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/zhaoyao/jedi/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/zhaoyao/jedi/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Jedi</h1>
+          <p>A simple persistence library for redis</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/zhaoyao">zhaoyao</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>Jedi</h1>
+
+<p>Jedi is a simple and small library for storing objects in redis. It uses <a href="http://github.com/xetorthio/jedis" title="Jedis">Jedis</a> internally so it is fully compatible with Redis 2.0.0.</p>
+
+<p><strong>This project is not ready for production yet</strong>.</p>
+
+<h1>It is not an orm framework</h1>
+
+<p>So it does not support orm features, like relation mappings, which <a href="https://github.com/xetorthio/johm" title="Johm">Johm</a> provided.</p>
+
+<h1>Examples</h1>
+
+<p>Jedi works fine with simple java pojos, just use very small amount of annotations</p>
+
+<div class="highlight">
+<pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Book</span> <span class="o">{</span>
+
+    <span class="nd">@Id</span>  
+    <span class="kd">private</span> <span class="n">Long</span> <span class="n">id</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">author</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">title</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="n">Date</span> <span class="n">publishedAt</span><span class="o">;</span>
+<span class="o">}</span>
+</pre>
+</div>
+
+
+<p>Done. Let's begin some crud staffs</p>
+
+<h3>Basic CRUD</h3>
+
+<div class="highlight">
+<pre>
+<span class="c1">//initialize jedis pool</span>
+<span class="n">JedisPool</span> <span class="n">jedisPool</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JedisPool</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">,</span> <span class="mi">6379</span><span class="o">);</span>
+<span class="n">Jedi</span> <span class="n">jedi</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Jedi</span><span class="o">(</span><span class="n">jedisPool</span><span class="o">);</span>
+
+<span class="n">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Book</span><span class="o">();</span>
+<span class="n">book</span><span class="o">.</span><span class="na">setTile</span><span class="o">(</span><span class="s">"Harry Potter"</span><span class="o">);</span>
+<span class="n">book</span><span class="o">.</span><span class="na">setAutor</span><span class="o">(</span><span class="s">"J.K.Rowling"</span><span class="o">);</span>
+<span class="n">jedi</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">book</span><span class="o">);</span>
+
+<span class="c1">// the generated redis hash will be { id: __auto_generated__, title: "Harry Potter", author: "J.K.Rowling" }</span>
+
+<span class="n">assertNotNull</span><span class="o">(</span><span class="n">book</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span> <span class="c1">//auto id generation</span>
+<span class="n">assertNotNull</span><span class="o">(</span><span class="n">jedi</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">Book</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">book</span><span class="o">.</span><span class="na">getId</span><span class="o">()));</span> <span class="c1">//ready for id lookup</span>
+
+<span class="n">Long</span> <span class="n">id</span> <span class="o">=</span> <span class="n">book</span><span class="o">.</span><span class="na">getId</span><span class="o">();</span>
+
+<span class="c1">//oh, we forgot to set the publish date</span>
+<span class="n">book</span><span class="o">.</span><span class="na">setPublishedAt</span><span class="o">(</span><span class="k">new</span> <span class="n">Date</span><span class="o">());</span>
+<span class="n">jedi</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">book</span><span class="o">);</span>
+
+<span class="c1">// the redis hash will be updated to { id: __auto_generated__, title: "Harry Potter", author: "J.K.Rowling", publishedAt: __epoch__ }</span>
+<span class="c1">// the java.util.Date will serialized to epoch, the Serialization will be covered later</span>
+
+<span class="n">jedi</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="n">book</span><span class="o">);</span> <span class="c1">//see-ya, or you may need jedi.delete(Book.class, book.getId());</span>
+
+</pre>
+</div>
+
+
+<h3>Directly talk to redis</h3>
+
+<div class="highlight">
+<pre><span class="n">jedi</span><span class="o">.</span><span class="na">withJedis</span><span class="o">(</span><span class="k">new</span> <span class="n">JedisCallback</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">(</span><span class="n">Jedis</span> <span class="n">jedis</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//automatic jedis pool resource managment like JdbcTemplate does</span>
+    <span class="o">}</span>
+
+<span class="o">});</span>
+</pre>
+</div>
+
+
+<p>or</p>
+
+<div class="highlight">
+<pre><span class="n">jedi</span><span class="o">.</span><span class="na">withTransaction</span><span class="o">(</span><span class="k">new</span> <span class="n">TransactionCallback</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">execute</span><span class="o">(</span><span class="n">Transaction</span> <span class="n">transaction</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">//automatic transaltion start, commit and discard on exception</span>
+    <span class="o">}</span>
+<span class="o">});</span>
+</pre>
+</div>
+
+
+<h3>Index support</h3>
+
+<p>Let's add some indexes to Book</p>
+
+<div class="highlight">
+<pre><span class="nd">@Index</span><span class="o">(</span><span class="n">on</span> <span class="o">=</span> <span class="s">"author"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Book</span> <span class="o">{</span>
+   <span class="c1">// </span>
+<span class="o">}</span>
+</pre>
+</div>
+
+
+<p>Then we can find books by their author</p>
+
+<div class="highlight">
+<pre><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Book</span><span class="o">&gt;</span> <span class="n">booksOfRowling</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="n">Book</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">where</span><span class="o">(</span><span class="s">"author"</span><span class="o">).</span><span class="na">is</span><span class="o">(</span><span class="s">"J.K.Rowling"</span><span class="o">).</span><span class="na">iterate</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+</pre>
+</div>
+
+
+<p>index rebuild is still in working progress. So for now, the <strong>old objects will not be indexed</strong>.</p>
+
+<h3>Range support</h3>
+
+<div class="highlight">
+<pre><span class="nd">@Index</span><span class="o">(</span><span class="n">on</span> <span class="o">=</span> <span class="s">"author"</span><span class="o">,</span> <span class="n">range</span> <span class="o">=</span> <span class="s">"publishedAt"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Book</span> <span class="o">{</span>
+    <span class="c1">//</span>
+<span class="o">}</span>
+</pre>
+</div>
+
+
+<p>Then you can find books by author and its published date</p>
+
+<div class="highlight">
+<pre><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Book</span><span class="o">&gt;</span> <span class="n">booksOfRowlingAfter2001</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="n">Book</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+                                            <span class="o">.</span><span class="na">where</span><span class="o">(</span><span class="s">"author"</span><span class="o">)</span>
+                                                <span class="o">.</span><span class="na">is</span><span class="o">(</span><span class="s">"J.K.Rowling"</span><span class="o">)</span>
+                                            <span class="o">.</span><span class="na">andRange</span><span class="o">(</span><span class="s">"publishedAt"</span><span class="o">)</span>
+                                                <span class="o">.</span><span class="na">within</span><span class="o">(</span><span class="n">date2001InEpoch</span><span class="o">,</span> <span class="n">Double</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">);</span>
+</pre>
+</div>
+
+
+<p>If you need to index author both in published date range and some other fields, you should declare it like: </p>
+
+<div class="highlight">
+<pre><span class="nd">@Indexes</span><span class="o">(</span>
+    <span class="o">{</span>
+        <span class="nd">@Index</span><span class="o">(</span><span class="n">on</span> <span class="o">=</span> <span class="s">"author"</span><span class="o">,</span> <span class="n">range</span> <span class="o">=</span> <span class="s">"publishedAt"</span><span class="o">),</span>
+        <span class="nd">@Index</span><span class="o">(</span><span class="n">on</span> <span class="o">=</span> <span class="s">"author"</span><span class="o">,</span> <span class="n">range</span> <span class="o">=</span> <span class="s">"someOtherField"</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Book</span> <span class="o">{</span>
+    <span class="c1">//</span>
+<span class="o">}</span>
+</pre>
+</div>
+
+
+<h3>Multi fields index support</h3>
+
+<p>So what to do if we want to find books by its author and its title?</p>
+
+<div class="highlight">
+<pre><span class="nd">@Index</span><span class="o">(</span><span class="n">on</span> <span class="o">=</span> <span class="o">{</span><span class="s">"author"</span><span class="o">,</span> <span class="s">"title"</span><span class="o">})</span>
+<span class="c1">//or you may prefer @Index(on = "author, title")</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Book</span> <span class="o">{</span>
+    <span class="c1">//</span>
+<span class="o">}</span>
+</pre>
+</div>
+
+
+<p>Then you can find them like: </p>
+
+<div class="highlight">
+<pre><span class="n">jedi</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="n">Book</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">where</span><span class="o">(</span><span class="s">"author"</span><span class="o">).</span><span class="na">is</span><span class="o">(</span><span class="s">"J.K.Rowling"</span><span class="o">).</span><span class="na">and</span><span class="o">(</span><span class="s">"title"</span><span class="o">).</span><span class="na">is</span><span class="o">(</span><span class="s">"Harry Potter"</span><span class="o">).</span><span class="na">iterator</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span>
+</pre>
+</div>
+
+
+<p>Maybe we should add some method like <em>fetchOne</em> for unique index?</p>
+
+<h1>Serialization</h1>
+
+<p>The java object will be converted to String based hash, then perisist to redis.
+for now jedi supports types:</p>
+
+<ul>
+<li>All basic primitive types and their wrappers</li>
+<li>java.util.Date</li>
+<li>String of couse</li>
+</ul><p>You can implemated your own StringSerializer, and register it using:</p>
+
+<div class="highlight">
+<pre><span class="n">StringSerializers</span><span class="o">.</span><span class="na">regiser</span><span class="o">(</span><span class="n">yourType</span><span class="o">,</span> <span class="n">yourSerializer</span><span class="o">);</span>
+</pre>
+</div>
+
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+  </body>
+</html>
